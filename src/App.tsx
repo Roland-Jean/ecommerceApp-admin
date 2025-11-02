@@ -10,7 +10,6 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import {
   ErrorComponent,
   ThemedLayout,
-  ThemedSider,
   useNotificationProvider,
 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
@@ -26,7 +25,7 @@ import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd";
 import axios from "axios";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
-import { Header } from "./components/header";
+import { Header, CustomSider } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import {
   BlogPostCreate,
@@ -40,6 +39,7 @@ import {
   CategoryList,
   CategoryShow,
 } from "./pages/categories";
+import { DashboardPage } from "./pages/dashboard";
 import { Login } from "./pages/login";
 
 function App() {
@@ -117,7 +117,14 @@ function App() {
     getIdentity: async () => {
       if (keycloak?.tokenParsed) {
         return {
-          name: keycloak.tokenParsed.family_name,
+          id: keycloak.tokenParsed.sub,
+          name: keycloak.tokenParsed.name || keycloak.tokenParsed.preferred_username,
+          email: keycloak.tokenParsed.email,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${keycloak.tokenParsed.preferred_username || 'user'}`,
+          firstName: keycloak.tokenParsed.given_name,
+          lastName: keycloak.tokenParsed.family_name,
+          username: keycloak.tokenParsed.preferred_username,
+          roles: keycloak.tokenParsed.realm_access?.roles || [],
         };
       }
       return null;
@@ -138,13 +145,23 @@ function App() {
                 authProvider={authProvider}
                 resources={[
                   {
-                    name: "blog_posts",
+                    name: "dashboard",
+                    list: "/",
+                    meta: {
+                      label: "Dashboard",
+                      icon: "📊",
+                    },
+                  },
+                  {
+                    name: "posts",
                     list: "/blog-posts",
                     create: "/blog-posts/create",
                     edit: "/blog-posts/edit/:id",
                     show: "/blog-posts/show/:id",
                     meta: {
                       canDelete: true,
+                      label: "Blog Posts",
+                      icon: "📝",
                     },
                   },
                   {
@@ -155,6 +172,7 @@ function App() {
                     show: "/categories/show/:id",
                     meta: {
                       canDelete: true,
+                      icon: "🏷️",
                     },
                   },
                 ]}
@@ -172,7 +190,7 @@ function App() {
                       >
                         <ThemedLayout
                           Header={Header}
-                          Sider={(props) => <ThemedSider {...props} fixed />}
+                          Sider={CustomSider}
                         >
                           <Outlet />
                         </ThemedLayout>
@@ -181,7 +199,7 @@ function App() {
                   >
                     <Route
                       index
-                      element={<NavigateToResource resource="blog_posts" />}
+                      element={<DashboardPage />}
                     />
                     <Route path="/blog-posts">
                       <Route index element={<BlogPostList />} />
