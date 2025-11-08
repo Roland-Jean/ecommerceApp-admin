@@ -45,28 +45,6 @@ export const Login: React.FC = () => {
             </Title>
             <Text type="secondary">Sign in to your dashboard</Text>
           </div>
-
-          {/* Login Information Alert */}
-          <Alert
-            message="Keycloak Authentication"
-            description={
-              <Space direction="vertical" size="small" style={{ width: "100%" }}>
-                <Text>You will be redirected to Keycloak login page</Text>
-                <div style={{ marginTop: "8px" }}>
-                  <Text strong>Test Credentials:</Text>
-                  <div style={{ marginLeft: "8px" }}>
-                    <Text>Username: <Text code>admin</Text></Text>
-                    <br />
-                    <Text>Password: <Text code>admin</Text></Text>
-                  </div>
-                </div>
-              </Space>
-            }
-            type="info"
-            showIcon
-            style={{ width: "100%", marginBottom: "16px" }}
-          />
-
           {/* Login Button */}
           <Button
             style={{ 
