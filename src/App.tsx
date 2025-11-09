@@ -1,7 +1,6 @@
 import {
   Authenticated,
   AuthProvider,
-  GitHubBanner,
   Refine,
 } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
@@ -10,12 +9,10 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import {
   ErrorComponent,
   ThemedLayout,
-  ThemedSider,
   useNotificationProvider,
 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 
-import { useKeycloak } from "@react-keycloak/web";
 import routerProvider, {
   CatchAllNavigate,
   DocumentTitleHandler,
@@ -26,7 +23,7 @@ import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd";
 import axios from "axios";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
-import { Header } from "./components/header";
+import { Header, CustomSider } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import {
   BlogPostCreate,
@@ -40,84 +37,111 @@ import {
   CategoryList,
   CategoryShow,
 } from "./pages/categories";
+import { DashboardPage } from "./pages/dashboard";
 import { Login } from "./pages/login";
+import { API_CONFIG } from "./config/api";
+
+// Update this URL to your Spring Boot backend
+const API_URL = API_CONFIG.baseURL;
 
 function App() {
-  const { keycloak, initialized } = useKeycloak();
-
-  if (!initialized) {
-    return <div>Loading...</div>;
-  }
-
   const authProvider: AuthProvider = {
-    login: async () => {
-      const urlSearchParams = new URLSearchParams(window.location.search);
-      const { to } = Object.fromEntries(urlSearchParams.entries());
-      await keycloak.login({
-        redirectUri: to ? `${window.location.origin}${to}` : undefined,
-      });
-      return {
-        success: true,
-      };
-    },
-    logout: async () => {
+    login: async ({ email, password }) => {
       try {
-        await keycloak.logout({
-          redirectUri: window.location.origin,
+        // TODO: Replace with your Spring Boot login endpoint
+        const response = await axios.post(`${API_URL}/auth/login`, {
+          email,
+          password,
         });
-        return {
-          success: true,
-          redirectTo: "/login",
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: new Error("Logout failed"),
-        };
-      }
-    },
-    onError: async (error) => {
-      console.error(error);
-      return { error };
-    },
-    check: async () => {
-      try {
-        const { token } = keycloak;
+
+        const { token, user } = response.data;
+
         if (token) {
-          axios.defaults.headers.common = {
-            Authorization: `Bearer ${token}`,
-          };
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          
           return {
-            authenticated: true,
-          };
-        } else {
-          return {
-            authenticated: false,
-            logout: true,
-            redirectTo: "/login",
-            error: {
-              message: "Check failed",
-              name: "Token not found",
-            },
+            success: true,
+            redirectTo: "/",
           };
         }
-      } catch (error) {
+
         return {
-          authenticated: false,
-          logout: true,
-          redirectTo: "/login",
+          success: false,
           error: {
-            message: "Check failed",
-            name: "Token not found",
+            name: "LoginError",
+            message: "Invalid credentials",
+          },
+        };
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            name: "LoginError",
+            message: error?.response?.data?.message || "Login failed. Please try again.",
           },
         };
       }
     },
-    getPermissions: async () => null,
-    getIdentity: async () => {
-      if (keycloak?.tokenParsed) {
+    logout: async () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      delete axios.defaults.headers.common["Authorization"];
+      
+      return {
+        success: true,
+        redirectTo: "/login",
+      };
+    },
+    onError: async (error) => {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
         return {
-          name: keycloak.tokenParsed.family_name,
+          logout: true,
+          redirectTo: "/login",
+          error,
+        };
+      }
+      return { error };
+    },
+    check: async () => {
+      const token = localStorage.getItem("token");
+      
+      if (token) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        return {
+          authenticated: true,
+        };
+      }
+
+      return {
+        authenticated: false,
+        logout: true,
+        redirectTo: "/login",
+        error: {
+          message: "Authentication required",
+          name: "Unauthorized",
+        },
+      };
+    },
+    getPermissions: async () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        return parsedUser.roles || [];
+      }
+      return null;
+    },
+    getIdentity: async () => {
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        return {
+          id: parsedUser.id,
+          name: parsedUser.name || parsedUser.username,
+          email: parsedUser.email,
+          avatar: parsedUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${parsedUser.email}`,
+          ...parsedUser,
         };
       }
       return null;
@@ -126,7 +150,6 @@ function App() {
 
   return (
     <BrowserRouter>
-      <GitHubBanner />
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <AntdApp>
@@ -138,13 +161,23 @@ function App() {
                 authProvider={authProvider}
                 resources={[
                   {
-                    name: "blog_posts",
+                    name: "dashboard",
+                    list: "/",
+                    meta: {
+                      label: "Dashboard",
+                      icon: "📊",
+                    },
+                  },
+                  {
+                    name: "posts",
                     list: "/blog-posts",
                     create: "/blog-posts/create",
                     edit: "/blog-posts/edit/:id",
                     show: "/blog-posts/show/:id",
                     meta: {
                       canDelete: true,
+                      label: "Blog Posts",
+                      icon: "📝",
                     },
                   },
                   {
@@ -155,6 +188,7 @@ function App() {
                     show: "/categories/show/:id",
                     meta: {
                       canDelete: true,
+                      icon: "🏷️",
                     },
                   },
                 ]}
@@ -172,7 +206,7 @@ function App() {
                       >
                         <ThemedLayout
                           Header={Header}
-                          Sider={(props) => <ThemedSider {...props} fixed />}
+                          Sider={CustomSider}
                         >
                           <Outlet />
                         </ThemedLayout>
@@ -181,7 +215,7 @@ function App() {
                   >
                     <Route
                       index
-                      element={<NavigateToResource resource="blog_posts" />}
+                      element={<DashboardPage />}
                     />
                     <Route path="/blog-posts">
                       <Route index element={<BlogPostList />} />

@@ -1,1 +1,230 @@
 @import "tailwindcss";
+
+/* Custom animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Dashboard stat cards animation */
+.dashboard-stat-card {
+    animation: fadeIn 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+.dashboard-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+    background: #1f1f1f;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Card hover effects */
+.ant-card {
+    transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Table row hover */
+.ant-table-row {
+    transition: all 0.2s ease;
+}
+
+.ant-table-row:hover {
+    background-color: rgba(24, 144, 255, 0.05) !important;
+}
+
+/* Button animations */
+.ant-btn {
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.ant-btn:hover {
+    transform: translateY(-2px);
+}
+
+.ant-btn:active {
+    transform: translateY(0);
+}
+
+/* Tag animations */
+.ant-tag {
+    transition: all 0.2s ease;
+}
+
+.ant-tag:hover {
+    opacity: 0.85;
+}
+
+/* Gradient backgrounds */
+.gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.gradient-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.gradient-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Custom layout transitions */
+.ant-layout-content {
+    transition: all 0.3s ease;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.skeleton-loading {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(to right,
+            #f0f0f0 4%,
+            #e8e8e8 25%,
+            #f0f0f0 36%);
+    background-size: 1000px 100%;
+}
+
+/* Badge pulse animation */
+.ant-badge-count {
+    animation: pulse 2s infinite;
+}
+
+/* Menu item transitions */
+.ant-menu-item,
+.ant-menu-submenu-title {
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Card content fade in */
+.ant-card-body>* {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Avatar border animation */
+.ant-avatar {
+    transition: all 0.3s ease;
+}
+
+.ant-avatar:hover {
+    box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.2);
+}
+
+/* Statistics animation */
+.ant-statistic-content {
+    animation: slideInRight 0.5s ease-out;
+}
+
+/* Custom focus styles */
+.ant-input:focus,
+.ant-input-focused {
+    box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+}
+
+/* Progress bar animation */
+.ant-progress-line {
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Dropdown animation */
+.ant-dropdown {
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal animation */
+.ant-modal {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Notification slide in */
+.ant-notification {
+    animation: slideInRight 0.4s ease-out;
+}
