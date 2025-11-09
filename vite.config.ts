@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: process.env.GITHUB_PAGES ? '/ecommerceApp-admin/' : '/',
+  // Set base to your repository name for GitHub Pages
+  base: '/ecommerceApp-admin/',
   build: {
     outDir: 'dist',
     sourcemap: false,
