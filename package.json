@@ -40,10 +40,14 @@
     "vite": "^6.3.5"
   },
   "scripts": {
-    "dev": "refine dev",
-    "build": "tsc && refine build",
+    "dev": "vite",
+    "dev:refine": "refine dev",
+    "build": "tsc && vite build",
+    "build:gh-pages": "tsc && vite build",
     "start": "refine start",
-    "refine": "refine"
+    "refine": "refine",
+    "test": "echo 'No tests specified' && exit 0",
+    "preview": "vite preview"
   },
   "browserslist": {
     "production": [
