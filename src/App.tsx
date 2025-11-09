@@ -44,11 +44,38 @@ import { API_CONFIG } from "./config/api";
 // Update this URL to your Spring Boot backend
 const API_URL = API_CONFIG.baseURL;
 
+// Test credentials for demo/development
+const TEST_USER = {
+  email: "admin@test.com",
+  password: "admin123",
+  token: "demo-jwt-token-12345",
+  user: {
+    id: 1,
+    name: "Admin User",
+    email: "admin@test.com",
+    username: "admin",
+    roles: ["admin"],
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+  },
+};
+
 function App() {
   const authProvider: AuthProvider = {
     login: async ({ email, password }) => {
+      // Check for test credentials (for demo/development)
+      if (email === TEST_USER.email && password === TEST_USER.password) {
+        localStorage.setItem("token", TEST_USER.token);
+        localStorage.setItem("user", JSON.stringify(TEST_USER.user));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${TEST_USER.token}`;
+        
+        return {
+          success: true,
+          redirectTo: "/",
+        };
+      }
+
+      // Try real backend if not using test credentials
       try {
-        // TODO: Replace with your Spring Boot login endpoint
         const response = await axios.post(`${API_URL}/auth/login`, {
           email,
           password,
