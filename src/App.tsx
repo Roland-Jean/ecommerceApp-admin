@@ -45,7 +45,8 @@ import { API_CONFIG } from "./config/api";
 const API_URL = API_CONFIG.baseURL;
 
 // Get base path for GitHub Pages
-const basename = import.meta.env.PROD ? '/ecommerceApp-admin' : '';
+// Use VITE_GITHUB_PAGES flag that matches vite.config.ts base path setting
+const basename = import.meta.env.VITE_GITHUB_PAGES ? '/ecommerceApp-admin' : '';
 
 // Test credentials for demo/development
 const TEST_USER = {

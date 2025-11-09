@@ -44,7 +44,7 @@
     "dev": "vite",
     "dev:refine": "refine dev",
     "build": "tsc && vite build",
-    "build:gh-pages": "cross-env GITHUB_PAGES=true tsc && vite build",
+    "build:gh-pages": "cross-env GITHUB_PAGES=true sh -c \"tsc && vite build\"",
     "start": "refine start",
     "refine": "refine",
     "test": "echo 'No tests specified' && exit 0",
