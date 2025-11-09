@@ -44,6 +44,9 @@ import { API_CONFIG } from "./config/api";
 // Update this URL to your Spring Boot backend
 const API_URL = API_CONFIG.baseURL;
 
+// Get base path for GitHub Pages
+const basename = import.meta.env.PROD ? '/ecommerceApp-admin' : '';
+
 // Test credentials for demo/development
 const TEST_USER = {
   email: "admin@test.com",
@@ -176,7 +179,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <RefineKbarProvider>
         <ColorModeContextProvider>
           <AntdApp>
