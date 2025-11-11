@@ -39,52 +39,19 @@ import {
 } from "./pages/categories";
 import { DashboardPage } from "./pages/dashboard";
 import { Login } from "./pages/login";
-import { API_CONFIG } from "./config/api";
+import { api } from "./config/api";
 
-// Update this URL to your Spring Boot backend
-const API_URL = API_CONFIG.baseURL;
-
-// Get base path for GitHub Pages
-// Use VITE_GITHUB_PAGES flag that matches vite.config.ts base path setting
 const basename = import.meta.env.VITE_GITHUB_PAGES ? '/ecommerceApp-admin' : '';
-
-// Test credentials for demo/development
-const TEST_USER = {
-  email: "admin@test.com",
-  password: "admin123",
-  token: "demo-jwt-token-12345",
-  user: {
-    id: 1,
-    name: "Admin User",
-    email: "admin@test.com",
-    username: "admin",
-    roles: ["admin"],
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
-  },
-};
 
 function App() {
   const authProvider: AuthProvider = {
     login: async ({ email, password }) => {
-      // Check for test credentials (for demo/development)
-      if (email === TEST_USER.email && password === TEST_USER.password) {
-        localStorage.setItem("token", TEST_USER.token);
-        localStorage.setItem("user", JSON.stringify(TEST_USER.user));
-        axios.defaults.headers.common["Authorization"] = `Bearer ${TEST_USER.token}`;
-        
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-
-      // Try real backend if not using test credentials
       try {
-        const response = await axios.post(`${API_URL}/auth/login`, {
+        const response = await api.post(`/auth/login`, {
           email,
           password,
         });
-
+        console.log(response);
         const { token, user } = response.data;
 
         if (token) {
@@ -110,7 +77,7 @@ function App() {
           success: false,
           error: {
             name: "LoginError",
-            message: error?.response?.data?.message || "Login failed. Please try again.",
+            message:error?.response?.data?.message || error?.message || "login failed. verify your credentials", 
           },
         };
       }
