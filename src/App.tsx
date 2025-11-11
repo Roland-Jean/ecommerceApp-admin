@@ -207,7 +207,7 @@ function App() {
                     show: "/blog-posts/show/:id",
                     meta: {
                       canDelete: true,
-                      label: "Blog Posts",
+                      label: "Articles",
                       icon: "📝",
                     },
                   },
@@ -221,6 +221,18 @@ function App() {
                       canDelete: true,
                       icon: "🏷️",
                     },
+                  },
+                   {
+                    name: "users",
+                    list: "/users",
+                    create: "/users/create",
+                    edit: "/user/edit/:id",
+                    show: "/user/show/:id",
+                    meta: {
+                      canDelete: true,
+                      label:"Users",
+                      icon: "👥",
+                    }
                   },
                 ]}
                 options={{
