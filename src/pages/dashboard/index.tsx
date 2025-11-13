@@ -24,8 +24,8 @@ import {
 const { Title, Text } = Typography;
 
 export const DashboardPage = () => {
-  const { result: { data: blogPosts } = { data: [] } } = useList({
-    resource: "posts",
+  const { result: { data: products } = { data: [] } } = useList({
+    resource: "products",
     pagination: { pageSize: 5 },
   });
 
@@ -33,15 +33,23 @@ export const DashboardPage = () => {
     resource: "categories",
   });
 
-  // Simulated stats - in real app, these would come from your API
+  const { result: { data: users } = { data: [] } } = useList({
+    resource: "users",
+  });
+
+  const { result: { data: orders } = { data: [] } } = useList({
+    resource: "orders",
+  });
+
+  // Calculate stats from real data
   const stats = {
-    totalRevenue: 54280,
-    revenueGrowth: 12.5,
-    totalOrders: 1254,
+    totalRevenue: orders?.reduce((sum: number, order: Record<string, unknown>) => sum + (Number(order.totalPrice) || 0), 0) || 0,
+    revenueGrowth: 12.5, // You can calculate this based on previous period
+    totalOrders: orders?.length || 0,
     ordersGrowth: 8.3,
-    totalUsers: 3421,
+    totalUsers: users?.length || 0,
     usersGrowth: -2.4,
-    totalProducts: 248,
+    totalProducts: products?.length || 0,
     productsGrowth: 5.1,
   };
 
@@ -180,16 +188,16 @@ export const DashboardPage = () => {
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Recent Blog Posts */}
+        {/* Recent Products */}
         <Col xs={24} lg={12}>
           <Card
             title={
               <Space>
                 <FileTextOutlined />
-                <span>Recent Blog Posts</span>
+                <span>Recent Products</span>
               </Space>
             }
-            extra={<a href="/posts">View All</a>}
+            extra={<a href="/products">View All</a>}
             style={{
               borderRadius: "12px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -198,7 +206,7 @@ export const DashboardPage = () => {
           >
             <List
               itemLayout="horizontal"
-              dataSource={blogPosts?.slice(0, 5) || []}
+              dataSource={products?.slice(0, 5) || []}
               renderItem={(item: Record<string, unknown>) => (
                 <List.Item>
                   <List.Item.Meta
@@ -209,13 +217,15 @@ export const DashboardPage = () => {
                       />
                     }
                     title={
-                      <a href={`/posts/show/${String(item.id)}`}>{String(item.title || "Untitled")}</a>
+                      <a href={`/products/show/${String(item.id || item.productId)}`}>
+                        {typeof item.name === 'string' ? item.name : (typeof item.productName === 'string' ? item.productName : "Untitled")}
+                      </a>
                     }
                     description={
                       <Space>
-                        <Tag color="blue">{String(item.status || "draft")}</Tag>
+                        <Tag color="green">${Number(item.price || 0).toFixed(2)}</Tag>
                         <Text type="secondary" style={{ fontSize: "12px" }}>
-                          {item.createdAt ? new Date(item.createdAt as string).toLocaleDateString() : "N/A"}
+                          Stock: {Number(item.stock || item.quantity || 0)}
                         </Text>
                       </Space>
                     }

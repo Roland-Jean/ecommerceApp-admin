@@ -3,8 +3,6 @@ import {
   AuthProvider,
   Refine,
 } from "@refinedev/core";
-import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
-import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
 import {
   ErrorComponent,
@@ -19,18 +17,11 @@ import routerProvider, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import dataProvider from "@refinedev/simple-rest";
 import { App as AntdApp } from "antd";
 import axios from "axios";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Header, CustomSider } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-import {
-  BlogPostCreate,
-  BlogPostEdit,
-  BlogPostList,
-  BlogPostShow,
-} from "./pages/blog-posts";
 import {
   CategoryCreate,
   CategoryEdit,
@@ -39,52 +30,20 @@ import {
 } from "./pages/categories";
 import { DashboardPage } from "./pages/dashboard";
 import { Login } from "./pages/login";
-import { API_CONFIG } from "./config/api";
+import { api } from "./config/api";
+import { dataProvider } from "./config/dataProvider";
 
-// Update this URL to your Spring Boot backend
-const API_URL = API_CONFIG.baseURL;
-
-// Get base path for GitHub Pages
-// Use VITE_GITHUB_PAGES flag that matches vite.config.ts base path setting
 const basename = import.meta.env.VITE_GITHUB_PAGES ? '/ecommerceApp-admin' : '';
-
-// Test credentials for demo/development
-const TEST_USER = {
-  email: "admin@test.com",
-  password: "admin123",
-  token: "demo-jwt-token-12345",
-  user: {
-    id: 1,
-    name: "Admin User",
-    email: "admin@test.com",
-    username: "admin",
-    roles: ["admin"],
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
-  },
-};
 
 function App() {
   const authProvider: AuthProvider = {
     login: async ({ email, password }) => {
-      // Check for test credentials (for demo/development)
-      if (email === TEST_USER.email && password === TEST_USER.password) {
-        localStorage.setItem("token", TEST_USER.token);
-        localStorage.setItem("user", JSON.stringify(TEST_USER.user));
-        axios.defaults.headers.common["Authorization"] = `Bearer ${TEST_USER.token}`;
-        
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-
-      // Try real backend if not using test credentials
       try {
-        const response = await axios.post(`${API_URL}/auth/login`, {
+        const response = await api.post(`/auth/login`, {
           email,
           password,
         });
-
+        console.log(response);
         const { token, user } = response.data;
 
         if (token) {
@@ -110,7 +69,7 @@ function App() {
           success: false,
           error: {
             name: "LoginError",
-            message: error?.response?.data?.message || "Login failed. Please try again.",
+            message:error?.response?.data?.message || error?.message || "login failed. verify your credentials", 
           },
         };
       }
@@ -181,12 +140,10 @@ function App() {
 
   return (
     <BrowserRouter basename={basename}>
-      <RefineKbarProvider>
-        <ColorModeContextProvider>
-          <AntdApp>
-            <DevtoolsProvider>
-              <Refine
-                dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
+      <ColorModeContextProvider>
+        <AntdApp>
+          <Refine
+                dataProvider={dataProvider("http://localhost:8081/api/v1")}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerProvider}
                 authProvider={authProvider}
@@ -200,15 +157,15 @@ function App() {
                     },
                   },
                   {
-                    name: "posts",
-                    list: "/blog-posts",
-                    create: "/blog-posts/create",
-                    edit: "/blog-posts/edit/:id",
-                    show: "/blog-posts/show/:id",
+                    name: "products",
+                    list: "/products",
+                    create: "/products/create",
+                    edit: "/products/edit/:id",
+                    show: "/products/show/:id",
                     meta: {
                       canDelete: true,
-                      label: "Articles",
-                      icon: "📝",
+                      label: "Products",
+                      icon: "📦",
                     },
                   },
                   {
@@ -219,20 +176,53 @@ function App() {
                     show: "/categories/show/:id",
                     meta: {
                       canDelete: true,
+                      label: "Categories",
                       icon: "🏷️",
                     },
                   },
-                   {
+                  {
                     name: "users",
                     list: "/users",
                     create: "/users/create",
-                    edit: "/user/edit/:id",
-                    show: "/user/show/:id",
+                    edit: "/users/edit/:id",
+                    show: "/users/show/:id",
                     meta: {
                       canDelete: true,
-                      label:"Users",
+                      label: "Users",
                       icon: "👥",
-                    }
+                    },
+                  },
+                  {
+                    name: "orders",
+                    list: "/orders",
+                    create: "/orders/create",
+                    edit: "/orders/edit/:id",
+                    show: "/orders/show/:id",
+                    meta: {
+                      canDelete: true,
+                      label: "Orders",
+                      icon: "🛒",
+                    },
+                  },
+                  {
+                    name: "carts",
+                    list: "/carts",
+                    meta: {
+                      label: "Carts",
+                      icon: "🛍️",
+                    },
+                  },
+                  {
+                    name: "payment",
+                    list: "/payments",
+                    create: "/payments/create",
+                    edit: "/payments/edit/:id",
+                    show: "/payments/show/:id",
+                    meta: {
+                      canDelete: true,
+                      label: "Payments",
+                      icon: "💳",
+                    },
                   },
                 ]}
                 options={{
@@ -260,12 +250,6 @@ function App() {
                       index
                       element={<DashboardPage />}
                     />
-                    <Route path="/blog-posts">
-                      <Route index element={<BlogPostList />} />
-                      <Route path="create" element={<BlogPostCreate />} />
-                      <Route path="edit/:id" element={<BlogPostEdit />} />
-                      <Route path="show/:id" element={<BlogPostShow />} />
-                    </Route>
                     <Route path="/categories">
                       <Route index element={<CategoryList />} />
                       <Route path="create" element={<CategoryCreate />} />
@@ -288,15 +272,11 @@ function App() {
                   </Route>
                 </Routes>
 
-                <RefineKbar />
                 <UnsavedChangesNotifier />
                 <DocumentTitleHandler />
               </Refine>
-              <DevtoolsPanel />
-            </DevtoolsProvider>
           </AntdApp>
         </ColorModeContextProvider>
-      </RefineKbarProvider>
     </BrowserRouter>
   );
 }
