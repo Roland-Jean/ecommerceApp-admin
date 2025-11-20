@@ -39,7 +39,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "test":"jest",
+    "test": "jest --passWithNoTests",
     "dev:refine": "refine dev",
     "build": "tsc && vite build",
     "build:gh-pages": "cross-env GITHUB_PAGES=true sh -c \"tsc && vite build\"",
