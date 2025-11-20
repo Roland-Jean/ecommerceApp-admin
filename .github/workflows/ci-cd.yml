@@ -36,11 +36,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Cache Vite build
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.vite
+            .vite
+          key: ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-
+      
       - name: Run linting
         run: npm run lint --if-present
         continue-on-error: true
       
       - name: Run tests
+        if: github.event_name == 'pull_request'
         run: npm test
       
       - name: Set base path for build
@@ -74,10 +85,19 @@ jobs:
             echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/" >> $GITHUB_OUTPUT
           fi
       
+      - name: Set artifact name
+        if: github.event_name == 'push'
+        id: artifact-name
+        run: |
+          # Sanitize branch name for artifact (replace / with -)
+          ARTIFACT_NAME=$(echo "build-${{ github.ref_name }}" | sed 's/\//-/g')
+          echo "name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+      
       - name: Upload build artifacts
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ github.ref_name }}
+          name: ${{ steps.artifact-name.outputs.name }}
           path: ./dist
           retention-days: 7
 
@@ -85,9 +105,6 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
     
     steps:
       - name: Download build artifacts
@@ -115,9 +132,6 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment:
-      name: development
-      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/
     
     steps:
       - name: Download build artifacts
