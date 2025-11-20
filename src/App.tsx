@@ -32,15 +32,23 @@ import { Login } from "./pages/login";
 import { api } from "./config/api";
 import { dataProvider } from "./config/dataProvider";
 
-// Only use basename for GitHub Pages, not for Vercel or other deployments
-const basename = (import.meta.env.VITE_GITHUB_PAGES === 'true' || import.meta.env.VITE_GITHUB_PAGES === true) 
-  ? '/ecommerceApp-admin' 
-  : '';
+// Only use basename for GitHub Pages
+const isGitHubPages = import.meta.env.VITE_GITHUB_PAGES;
+const basename = isGitHubPages ? '/ecommerceApp-admin' : '';
 
+console.log('App.tsx loaded');
+console.log('Environment:', import.meta.env.MODE);
+console.log('VITE_GITHUB_PAGES:', isGitHubPages);
 console.log('Basename:', basename);
-console.log('VITE_GITHUB_PAGES:', import.meta.env.VITE_GITHUB_PAGES);
 
 function App() {
+  console.log('App component rendering...');
+  
+  if (!basename) {
+    console.log('No basename - running on Vercel/local');
+  } else {
+    console.log('Using basename for GitHub Pages');
+  }
   const authProvider: AuthProvider = {
     login: async ({ email, password }) => {
       try {
