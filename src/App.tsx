@@ -14,7 +14,6 @@ import "@refinedev/antd/dist/reset.css";
 import routerProvider, {
   CatchAllNavigate,
   DocumentTitleHandler,
-  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
@@ -64,12 +63,15 @@ function App() {
             message: "Invalid credentials",
           },
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: {
             name: "LoginError",
-            message:error?.response?.data?.message || error?.message || "login failed. verify your credentials", 
+            message:
+              (axios.isAxiosError(error) && error.response?.data?.message) ||
+              (error instanceof Error ? error.message : null) ||
+              "login failed. verify your credentials",
           },
         };
       }
@@ -94,47 +96,43 @@ function App() {
       }
       return { error };
     },
-    check: async () => {
+    check: () => {
       const token = localStorage.getItem("token");
       
       if (token) {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        return {
+        return Promise.resolve({
           authenticated: true,
-        };
+        });
       }
 
-      return {
+      return Promise.resolve({
         authenticated: false,
         logout: true,
         redirectTo: "/login",
-        error: {
-          message: "Authentication required",
-          name: "Unauthorized",
-        },
-      };
+      });
     },
-    getPermissions: async () => {
+    getPermissions: () => {
       const user = localStorage.getItem("user");
       if (user) {
         const parsedUser = JSON.parse(user);
-        return parsedUser.roles || [];
+        return Promise.resolve(parsedUser.roles || []);
       }
-      return null;
+      return Promise.resolve(null);
     },
-    getIdentity: async () => {
+    getIdentity: () => {
       const user = localStorage.getItem("user");
       if (user) {
         const parsedUser = JSON.parse(user);
-        return {
+        return Promise.resolve({
           id: parsedUser.id,
           name: parsedUser.name || parsedUser.username,
           email: parsedUser.email,
           avatar: parsedUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${parsedUser.email}`,
           ...parsedUser,
-        };
+        });
       }
-      return null;
+      return Promise.resolve(null);
     },
   };
 
@@ -231,6 +229,7 @@ function App() {
                 }}
               >
                 <Routes>
+                  <Route path="/login" element={<Login />} />
                   <Route
                     element={
                       <Authenticated
@@ -257,18 +256,6 @@ function App() {
                       <Route path="show/:id" element={<CategoryShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
-                  </Route>
-                  <Route
-                    element={
-                      <Authenticated
-                        key="authenticated-outer"
-                        fallback={<Outlet />}
-                      >
-                        <NavigateToResource />
-                      </Authenticated>
-                    }
-                  >
-                    <Route path="/login" element={<Login />} />
                   </Route>
                 </Routes>
 
