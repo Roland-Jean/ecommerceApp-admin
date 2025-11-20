@@ -8,22 +8,11 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === 'true' ? '/ecommerceApp-admin/' : '/',
   define: {
     // Expose GITHUB_PAGES flag to the app
-    'import.meta.env.VITE_GITHUB_PAGES': JSON.stringify(process.env.GITHUB_PAGES === 'true'),
-    // Make sure import.meta.env is available
-    'process.env': {}
+    'import.meta.env.VITE_GITHUB_PAGES': JSON.stringify(process.env.GITHUB_PAGES === 'true')
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router'],
-          'refine-vendor': ['@refinedev/core', '@refinedev/antd'],
-          'antd-vendor': ['antd', '@ant-design/icons'],
-        },
-      },
-    },
   },
   server: {
     port: 5173,
