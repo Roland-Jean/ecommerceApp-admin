@@ -32,7 +32,13 @@ import { Login } from "./pages/login";
 import { api } from "./config/api";
 import { dataProvider } from "./config/dataProvider";
 
-const basename = import.meta.env.VITE_GITHUB_PAGES ? '/ecommerceApp-admin' : '';
+// Only use basename for GitHub Pages, not for Vercel or other deployments
+const basename = (import.meta.env.VITE_GITHUB_PAGES === 'true' || import.meta.env.VITE_GITHUB_PAGES === true) 
+  ? '/ecommerceApp-admin' 
+  : '';
+
+console.log('Basename:', basename);
+console.log('VITE_GITHUB_PAGES:', import.meta.env.VITE_GITHUB_PAGES);
 
 function App() {
   const authProvider: AuthProvider = {
