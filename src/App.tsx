@@ -58,6 +58,15 @@ function App() {
         });
         console.log(response);
         const { token, user } = response.data;
+        if(user.userRole!== "ADMIN"){
+          return{
+            success: false,
+            error: {
+              name: "LoginError",
+              message: "You do not have admin access",
+            }
+          }
+        }
         if (token) {
           localStorage.setItem("token", token);
           localStorage.setItem("user", JSON.stringify(user));

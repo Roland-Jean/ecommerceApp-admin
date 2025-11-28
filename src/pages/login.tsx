@@ -59,7 +59,7 @@ export const Login: React.FC = () => {
               EA
             </div>
             <Title level={3} style={{ margin: 0 }}>
-              EcommerceApp Admin
+              Doux - Telekom admin
             </Title>
             <Text type="secondary">Sign in to your dashboard</Text>
           </div>
