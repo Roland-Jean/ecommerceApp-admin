@@ -50,7 +50,7 @@ export const CategoryList = () => {
         >
           <Table
             {...tableProps}
-            rowKey="id"
+            rowKey="categoryId"
             style={{ marginTop: "16px" }}
             pagination={{
               ...tableProps.pagination,
@@ -59,7 +59,7 @@ export const CategoryList = () => {
             }}
           >
             <Table.Column
-              dataIndex="id"
+              dataIndex="categoryId"
               title="ID"
               width={100}
               sorter
@@ -70,25 +70,42 @@ export const CategoryList = () => {
               )}
             />
             <Table.Column
-              dataIndex="title"
+              dataIndex="name"
               title="Category Name"
               sorter
               render={(value, record: BaseRecord, index: number) => (
                 <Space>
-                  <Avatar
-                    icon={<TagsOutlined />}
-                    style={{
-                      backgroundColor: categoryColors[index % categoryColors.length],
-                    }}
-                    size="small"
-                  />
+                  {record.imageUrl ? (
+                    <Avatar
+                      src={record.imageUrl}
+                      size="small"
+                    />
+                  ) : (
+                    <Avatar
+                      icon={<TagsOutlined />}
+                      style={{
+                        backgroundColor: categoryColors[index % categoryColors.length],
+                      }}
+                      size="small"
+                    />
+                  )}
                   <a
-                    href={`/categories/show/${record.id}`}
+                    href={`/categories/show/${record.categoryId}`}
                     style={{ fontWeight: 500, fontSize: "15px" }}
                   >
                     {value || "Untitled Category"}
                   </a>
                 </Space>
+              )}
+            />
+            <Table.Column
+              dataIndex="description"
+              title="Description"
+              ellipsis
+              render={(value) => (
+                <span style={{ color: "#666" }}>
+                  {value || "No description"}
+                </span>
               )}
             />
             <Table.Column
@@ -98,9 +115,9 @@ export const CategoryList = () => {
               fixed="right"
               render={(_, record: BaseRecord) => (
                 <Space>
-                  <EditButton hideText size="small" recordItemId={record.id} />
-                  <ShowButton hideText size="small" recordItemId={record.id} />
-                  <DeleteButton hideText size="small" recordItemId={record.id} />
+                  <EditButton hideText size="small" recordItemId={record.categoryId} />
+                  <ShowButton hideText size="small" recordItemId={record.categoryId} />
+                  <DeleteButton hideText size="small" recordItemId={record.categoryId} />
                 </Space>
               )}
             />
