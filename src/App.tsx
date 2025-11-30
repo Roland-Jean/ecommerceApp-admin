@@ -17,7 +17,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
-import axios from "axios";
+import axios from "axios"; // Only used for type checking (isAxiosError)
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Header, CustomSider } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
@@ -27,17 +27,48 @@ import {
   CategoryList,
   CategoryShow,
 } from "./pages/categories";
+import {
+  ProductCreate,
+  ProductEdit,
+  ProductList,
+  ProductShow,
+} from "./pages/products";
+import {
+  UserCreate,
+  UserEdit,
+  UserList,
+  UserShow,
+} from "./pages/users";
+import {
+  OrderCreate,
+  OrderEdit,
+  OrderList,
+  OrderShow,
+} from "./pages/orders";
+import {
+  CartCreate,
+  CartList,
+} from "./pages/carts";
+import {
+  PaymentCreate,
+  PaymentEdit,
+  PaymentList,
+  PaymentShow,
+} from "./pages/payments";
 import { DashboardPage } from "./pages/dashboard";
 import { Login } from "./pages/login";
-import { api } from "./config/api";
+import { api, API_CONFIG } from "./config/api";
 import { dataProvider } from "./config/dataProvider";
 
 // Only use basename for GitHub Pages
-const isGitHubPages = import.meta.env.VITE_GITHUB_PAGES;
+const isGitHubPages = import.meta.env.VITE_GITHUB_PAGES === 'true';
 const basename = isGitHubPages ? '/ecommerceApp-admin' : '';
 
 console.log('App.tsx loaded');
 console.log('Environment:', import.meta.env.MODE);
+console.log('VITE_GITHUB_PAGES:', isGitHubPages);
+console.log('Basename:', basename);
+console.log('API Base URL:', API_CONFIG.baseURL);
 console.log('VITE_GITHUB_PAGES:', isGitHubPages);
 console.log('Basename:', basename);
 
@@ -56,21 +87,36 @@ function App() {
           email,
           password,
         });
-        console.log(response);
+        console.log('Login response:', response);
+        
         const { token, user } = response.data;
-        if(user.userRole!== "ADMIN"){
-          return{
+
+        // Check if user object exists
+        if (!user) {
+          return {
+            success: false,
+            error: {
+              name: "LoginError",
+              message: "Invalid response from server",
+            },
+          };
+        }
+
+        // Check if user has admin role
+        if (user.userRole !== "ADMIN") {
+          return {
             success: false,
             error: {
               name: "LoginError",
               message: "You do not have admin access",
-            }
-          }
+            },
+          };
         }
+
         if (token) {
+          // Store token - interceptor will automatically attach it to requests
           localStorage.setItem("token", token);
           localStorage.setItem("user", JSON.stringify(user));
-          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           
           return {
             success: true,
@@ -99,9 +145,9 @@ function App() {
       }
     },
     logout: async () => {
+      // Remove token and user from localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      delete axios.defaults.headers.common["Authorization"];
       
       return {
         success: true,
@@ -118,21 +164,21 @@ function App() {
       }
       return { error };
     },
-    check: () => {
+    check: async () => {
       const token = localStorage.getItem("token");
       
       if (token) {
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        return Promise.resolve({
+        // Token will be automatically attached by interceptor
+        return {
           authenticated: true,
-        });
+        };
       }
 
-      return Promise.resolve({
+      return {
         authenticated: false,
         logout: true,
         redirectTo: "/login",
-      });
+      };
     },
     getPermissions: () => {
       const user = localStorage.getItem("user");
@@ -271,11 +317,39 @@ function App() {
                       index
                       element={<DashboardPage />}
                     />
+                    <Route path="/products">
+                      <Route index element={<ProductList />} />
+                      <Route path="create" element={<ProductCreate />} />
+                      <Route path="edit/:id" element={<ProductEdit />} />
+                      <Route path="show/:id" element={<ProductShow />} />
+                    </Route>
                     <Route path="/categories">
                       <Route index element={<CategoryList />} />
                       <Route path="create" element={<CategoryCreate />} />
                       <Route path="edit/:id" element={<CategoryEdit />} />
                       <Route path="show/:id" element={<CategoryShow />} />
+                    </Route>
+                    <Route path="/users">
+                      <Route index element={<UserList />} />
+                      <Route path="create" element={<UserCreate />} />
+                      <Route path="edit/:id" element={<UserEdit />} />
+                      <Route path="show/:id" element={<UserShow />} />
+                    </Route>
+                    <Route path="/orders">
+                      <Route index element={<OrderList />} />
+                      <Route path="create" element={<OrderCreate />} />
+                      <Route path="edit/:id" element={<OrderEdit />} />
+                      <Route path="show/:id" element={<OrderShow />} />
+                    </Route>
+                    <Route path="/carts">
+                      <Route index element={<CartList />} />
+                      <Route path="create" element={<CartCreate />} />
+                    </Route>
+                    <Route path="/payments">
+                      <Route index element={<PaymentList />} />
+                      <Route path="create" element={<PaymentCreate />} />
+                      <Route path="edit/:id" element={<PaymentEdit />} />
+                      <Route path="show/:id" element={<PaymentShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

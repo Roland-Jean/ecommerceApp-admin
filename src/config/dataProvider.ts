@@ -6,7 +6,9 @@ const axiosInstance: AxiosInstance = api;
 
 export const dataProvider = (apiUrl: string): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters }) => {
-    const url = `${apiUrl}/${resource}`;
+    // Special handling for carts - use /carts/products endpoint
+    const endpoint = resource === "carts" ? "carts/products" : resource;
+    const url = `${apiUrl}/${endpoint}`;
 
     const page =
       pagination && "current" in pagination
@@ -63,7 +65,9 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
   },
 
   create: async ({ resource, variables }) => {
-    const url = `${apiUrl}/${resource}`;
+    // Special handling for users - use /users/register endpoint
+    const endpoint = resource === "users" ? "users/register" : resource;
+    const url = `${apiUrl}/${endpoint}`;
     const { data } = await axiosInstance.post(url, variables);
 
     return {
@@ -72,8 +76,31 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
   },
 
   update: async ({ resource, id, variables }) => {
-    const url = `${apiUrl}/${resource}/${id}`;
-    const { data } = await axiosInstance.put(url, variables);
+    let url = `${apiUrl}/${resource}`;
+    let updateData = variables;
+
+    // Special handling for different resources
+    if (resource === "categories") {
+      // For categories, Spring Boot expects PUT /categories with full object in body
+      updateData = { ...variables, categoryId: id };
+    } else if (resource === "products") {
+      // For products, use standard REST pattern
+      url = `${apiUrl}/${resource}/${id}`;
+    } else if (resource === "users") {
+      // For users, use /users/{id}
+      url = `${apiUrl}/${resource}/${id}`;
+    } else if (resource === "orders") {
+      // For orders, use /orders/{id}
+      url = `${apiUrl}/${resource}/${id}`;
+    } else if (resource === "payment") {
+      // For payment, PUT expects the object in body
+      updateData = { ...variables, paymentId: id };
+    } else {
+      // Default behavior
+      url = `${apiUrl}/${resource}/${id}`;
+    }
+
+    const { data } = await axiosInstance.put(url, updateData);
 
     return {
       data,
