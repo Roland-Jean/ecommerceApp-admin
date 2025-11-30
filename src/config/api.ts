@@ -2,7 +2,7 @@ import axios from "axios";
 
 // API Configuration
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8081/api/v1",
+  baseURL: import.meta.env.VITE_API_URL || "https://ecommerceapp-ii5l.onrender.com/api/v1",
 };
 
 // Create axios instance
