@@ -103,7 +103,7 @@ function App() {
         }
 
         // Check if user has admin role
-        if (user.userRole !== "ADMIN") {
+        if (user.role !== "ADMIN") {
           return {
             success: false,
             error: {
