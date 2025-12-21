@@ -2,7 +2,7 @@ import axios from "axios";
 
 // API Configuration
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_URL || "https://www.myapi.douxtelecom.com",
+  baseURL: import.meta.env.VITE_API_URL || "https://www.myapi.douxtelecom.com/api/v1",
 };
 
 // Create axios instance
