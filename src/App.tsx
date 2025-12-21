@@ -17,6 +17,14 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
+import {
+  DashboardOutlined,
+  ShoppingOutlined,
+  TagsOutlined,
+  UserOutlined,
+  ShoppingCartOutlined,
+  CreditCardOutlined,
+} from "@ant-design/icons";
 import axios from "axios"; // Only used for type checking (isAxiosError)
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Header, CustomSider } from "./components";
@@ -219,7 +227,7 @@ function App() {
                     list: "/",
                     meta: {
                       label: "Dashboard",
-                      icon: "📊",
+                      icon: <DashboardOutlined />,
                     },
                   },
                   {
@@ -231,7 +239,7 @@ function App() {
                     meta: {
                       canDelete: true,
                       label: "Products",
-                      icon: "📦",
+                      icon: <ShoppingOutlined />,
                     },
                   },
                   {
@@ -243,7 +251,7 @@ function App() {
                     meta: {
                       canDelete: true,
                       label: "Categories",
-                      icon: "🏷️",
+                      icon: <TagsOutlined />,
                     },
                   },
                   {
@@ -255,7 +263,7 @@ function App() {
                     meta: {
                       canDelete: true,
                       label: "Users",
-                      icon: "👥",
+                      icon: <UserOutlined />,
                     },
                   },
                   {
@@ -267,7 +275,7 @@ function App() {
                     meta: {
                       canDelete: true,
                       label: "Orders",
-                      icon: "🛒",
+                      icon: <ShoppingCartOutlined />,
                     },
                   },
                   {
@@ -275,7 +283,7 @@ function App() {
                     list: "/carts",
                     meta: {
                       label: "Carts",
-                      icon: "🛍️",
+                      icon: <ShoppingCartOutlined />,
                     },
                   },
                   {
@@ -287,7 +295,7 @@ function App() {
                     meta: {
                       canDelete: true,
                       label: "Payments",
-                      icon: "💳",
+                      icon: <CreditCardOutlined />,
                     },
                   },
                 ]}
