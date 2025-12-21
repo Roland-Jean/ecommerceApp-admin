@@ -209,7 +209,7 @@ function App() {
       <ColorModeContextProvider>
         <AntdApp>
           <Refine
-                dataProvider={dataProvider("http://localhost:8081/api/v1")}
+                dataProvider={dataProvider("https://www.myapi.douxtelecom.com/api/v1")}
                 notificationProvider={useNotificationProvider}
                 routerProvider={routerProvider}
                 authProvider={authProvider}
