@@ -14,7 +14,6 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
     const paginationSupported = [
       "products",
       "users",
-      "payment",
     ].includes(resource);
 
     let query: Record<string, string | number> = {};
