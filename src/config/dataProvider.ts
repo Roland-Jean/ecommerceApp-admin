@@ -10,19 +10,27 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
     const endpoint = resource === "carts" ? "carts/products" : resource;
     const url = `${apiUrl}/${endpoint}`;
 
-    const page =
-      pagination && "current" in pagination
-        ? (pagination.current as number) - 1
-        : 0;
-    const size =
-      pagination && "pageSize" in pagination
-        ? (pagination.pageSize as number)
-        : 10;
+    // Check if API supports pagination for this resource
+    const paginationSupported = [
+      "products",
+      "users",
+      "orders",
+      "payment",
+    ].includes(resource);
 
-    const query: Record<string, string | number> = {
-      page,
-      size,
-    };
+    let query: Record<string, string | number> = {};
+
+    if (paginationSupported && pagination) {
+      const page =
+        "current" in pagination ? (pagination.current as number) - 1 : 0;
+      const size =
+        "pageSize" in pagination ? (pagination.pageSize as number) : 10;
+
+      query = {
+        page,
+        size,
+      };
+    }
 
     // Add filters if provided
     if (filters) {
@@ -41,7 +49,9 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
       query.sort = sort.join("&");
     }
 
-    const { data } = await axiosInstance.get(url, { params: query });
+    const { data } = await axiosInstance.get(url, {
+      params: Object.keys(query).length > 0 ? query : undefined,
+    });
 
     // Handle both array responses and paginated responses
     const list = Array.isArray(data) ? data : data.content || data.data || [];
