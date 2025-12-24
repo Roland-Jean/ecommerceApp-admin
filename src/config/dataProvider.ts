@@ -14,7 +14,6 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
     const paginationSupported = [
       "products",
       "users",
-      "orders",
       "payment",
     ].includes(resource);
 
