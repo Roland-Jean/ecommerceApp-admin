@@ -57,8 +57,14 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
       ? data.length
       : data.totalElements || data.total || list.length;
 
+    // Map resource-specific ID fields to 'id' for Refine
+    const mappedList = list.map((item: any) => ({
+      ...item,
+      id: item.id || item.productId || item.categoryId || item.userId || item.orderId || item.cartId || item.paymentId,
+    }));
+
     return {
-      data: list,
+      data: mappedList,
       total,
     };
   },
@@ -67,8 +73,14 @@ export const dataProvider = (apiUrl: string): DataProvider => ({
     const url = `${apiUrl}/${resource}/${id}`;
     const { data } = await axiosInstance.get(url);
 
+    // Map resource-specific ID fields to 'id' for Refine
+    const mappedData = {
+      ...data,
+      id: data.id || data.productId || data.categoryId || data.userId || data.orderId || data.cartId || data.paymentId,
+    };
+
     return {
-      data,
+      data: mappedData,
     };
   },
 
