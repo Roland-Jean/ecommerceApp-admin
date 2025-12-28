@@ -1,4 +1,4 @@
-import { Show, TextField, NumberField, ImageField } from "@refinedev/antd";
+import { Show, TextField, ImageField } from "@refinedev/antd";
 import { useShow } from "@refinedev/core";
 import { Typography, Space, Avatar, Tag, Descriptions } from "antd";
 import { ShoppingOutlined } from "@ant-design/icons";
