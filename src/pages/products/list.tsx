@@ -25,7 +25,7 @@ export const ProductList = () => {
         <List title="Products">
           <Table
             {...tableProps}
-            rowKey="productId"
+            rowKey="id"
             style={{ marginTop: "16px" }}
             pagination={{
               ...tableProps.pagination,
@@ -56,7 +56,7 @@ export const ProductList = () => {
                     <Avatar icon={<ShoppingOutlined />} size="small" style={{ backgroundColor: "#4facfe" }} />
                   )}
                   <a
-                    href={`/products/show/${record.productId}`}
+                    href={`/products/show/${record.id}`}
                     style={{ fontWeight: 500, fontSize: "15px" }}
                   >
                     {value || "Untitled Product"}
@@ -135,9 +135,9 @@ export const ProductList = () => {
               fixed="right"
               render={(_, record: BaseRecord) => (
                 <Space>
-                  <EditButton hideText size="small" recordItemId={record.productId} />
-                  <ShowButton hideText size="small" recordItemId={record.productId} />
-                  <DeleteButton hideText size="small" recordItemId={record.productId} />
+                  <EditButton hideText size="small" recordItemId={record.id} />
+                  <ShowButton hideText size="small" recordItemId={record.id} />
+                  <DeleteButton hideText size="small" recordItemId={record.id} />
                 </Space>
               )}
             />
