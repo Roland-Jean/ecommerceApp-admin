@@ -1,16 +1,98 @@
 import { Create, useForm, useSelect } from "@refinedev/antd";
-import { Form, Input, InputNumber, Select, Switch } from "antd";
+import { Form, Input, InputNumber, Select, Switch, Upload, Button, message } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import type { UploadFile } from "antd/es/upload/interface";
+
+// Import the upload function
+const uploadToCloudinary = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "ecommerce");
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/dce1fl8qu/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  return response.json();
+};
 
 export const ProductCreate: React.FC = () => {
   const { formProps, saveButtonProps, onFinish } = useForm({});
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const { selectProps: categorySelectProps, query: categoryQuery } = useSelect({
     resource: "categories",
     optionLabel: "name",
     optionValue: "categoryId",
   });
+
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const cloudinaryResponse = await uploadToCloudinary(file);
+      
+      if (cloudinaryResponse.secure_url) {
+        setImageUrl(cloudinaryResponse.secure_url);
+        formProps.form?.setFieldsValue({ imageUrl: cloudinaryResponse.secure_url });
+        message.success("Image uploaded successfully!");
+        return true;
+      } else {
+        message.error("Failed to upload image to Cloudinary");
+        return false;
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error("Failed to upload image");
+      return false;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadProps = {
+    name: "file",
+    fileList,
+    beforeUpload: async (file: File) => {
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error("You can only upload image files!");
+        return Upload.LIST_IGNORE;
+      }
+
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        message.error("Image must be smaller than 5MB!");
+        return Upload.LIST_IGNORE;
+      }
+
+      const success = await handleImageUpload(file);
+      
+      if (success) {
+        setFileList([{
+          uid: file.uid,
+          name: file.name,
+          status: "done",
+          url: imageUrl,
+        }]);
+      }
+      
+      return false; // Prevent default upload behavior
+    },
+    onRemove: () => {
+      setFileList([]);
+      setImageUrl("");
+      formProps.form?.setFieldsValue({ imageUrl: "" });
+    },
+    maxCount: 1,
+  };
 
   const handleFormFinish = (values: any) => {
     // Transform categoryId to category array with full category object
@@ -161,27 +243,28 @@ export const ProductCreate: React.FC = () => {
         </Form.Item>
 
         <Form.Item
+          label="Upload Product Image"
+        >
+          <Upload {...uploadProps}>
+            <Button icon={<UploadOutlined />} loading={uploading}>
+              {uploading ? "Uploading..." : "Select Image"}
+            </Button>
+          </Upload>
+        </Form.Item>
+
+        <Form.Item
           label="Image URL"
           name="imageUrl"
           rules={[
             {
               required: true,
-              message: "Image URL is required",
-            },
-            {
-              type: "url",
-              message: "Please enter a valid URL",
-            },
-            {
-              max: 250,
-              message: "URL must be less than 250 characters",
+              message: "Please upload an image",
             },
           ]}
         >
           <Input 
-            placeholder="https://example.com/product-image.jpg" 
-            showCount 
-            maxLength={250}
+            placeholder="Image URL (auto-filled after upload)" 
+            disabled
           />
         </Form.Item>
       </Form>
