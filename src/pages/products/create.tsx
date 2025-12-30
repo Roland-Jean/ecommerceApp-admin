@@ -18,6 +18,10 @@ const uploadToCloudinary = async (file: File) => {
     }
   );
 
+  if (!response.ok) {
+    throw new Error("Failed to upload to Cloudinary");
+  }
+
   return response.json();
 };
 
@@ -40,18 +44,19 @@ export const ProductCreate: React.FC = () => {
       const cloudinaryResponse = await uploadToCloudinary(file);
       
       if (cloudinaryResponse.secure_url) {
-        setImageUrl(cloudinaryResponse.secure_url);
-        formProps.form?.setFieldsValue({ imageUrl: cloudinaryResponse.secure_url });
+        const uploadedUrl = cloudinaryResponse.secure_url;
+        setImageUrl(uploadedUrl);
+        formProps.form?.setFieldsValue({ imageUrl: uploadedUrl });
         message.success("Image uploaded successfully!");
-        return true;
+        return { success: true, url: uploadedUrl };
       } else {
         message.error("Failed to upload image to Cloudinary");
-        return false;
+        return { success: false, url: "" };
       }
     } catch (error) {
       console.error("Upload error:", error);
-      message.error("Failed to upload image");
-      return false;
+      message.error("Failed to upload image. Please try again.");
+      return { success: false, url: "" };
     } finally {
       setUploading(false);
     }
@@ -73,14 +78,14 @@ export const ProductCreate: React.FC = () => {
         return Upload.LIST_IGNORE;
       }
 
-      const success = await handleImageUpload(file);
+      const result = await handleImageUpload(file);
       
-      if (success) {
+      if (result.success) {
         setFileList([{
-          uid: file.uid,
+          uid: `${file.name}-${Date.now()}`,
           name: file.name,
           status: "done",
-          url: imageUrl,
+          url: result.url,
         }]);
       }
       
@@ -95,6 +100,11 @@ export const ProductCreate: React.FC = () => {
   };
 
   const handleFormFinish = (values: any) => {
+    if (!imageUrl) {
+      message.error("Please upload an image before submitting");
+      return;
+    }
+
     // Transform categoryId to category array with full category object
     const { categoryId, stockQuantity, ...rest } = values;
     
@@ -107,9 +117,12 @@ export const ProductCreate: React.FC = () => {
       ...rest,
       category: fullCategory ? [fullCategory] : [],
       stock: stockQuantity, // Map stockQuantity to stock
+      imageUrl: imageUrl, // Ensure imageUrl is included
     };
+    
     // Remove stockQuantity from the payload
     delete transformedValues.stockQuantity;
+    
     onFinish(transformedValues);
   };
 
@@ -244,28 +257,30 @@ export const ProductCreate: React.FC = () => {
 
         <Form.Item
           label="Upload Product Image"
+          required
         >
           <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined />} loading={uploading}>
+            <Button icon={<UploadOutlined />} loading={uploading} disabled={uploading}>
               {uploading ? "Uploading..." : "Select Image"}
             </Button>
           </Upload>
+          {imageUrl && (
+            <div style={{ marginTop: 8 }}>
+              <img 
+                src={imageUrl} 
+                alt="Preview" 
+                style={{ maxWidth: 200, maxHeight: 200, objectFit: "cover" }} 
+              />
+            </div>
+          )}
         </Form.Item>
 
         <Form.Item
           label="Image URL"
           name="imageUrl"
-          rules={[
-            {
-              required: true,
-              message: "Please upload an image",
-            },
-          ]}
+          hidden
         >
-          <Input 
-            placeholder="Image URL (auto-filled after upload)" 
-            disabled
-          />
+          <Input />
         </Form.Item>
       </Form>
     </Create>
